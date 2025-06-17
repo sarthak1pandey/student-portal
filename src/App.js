@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import './App.css';
 
 function App() {
@@ -9,15 +9,7 @@ function App() {
 
   const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
-  useEffect(() => {
-    fetchStudents();
-  }, []);
-
-  useEffect(() => {
-    document.body.className = darkMode ? 'dark' : 'light';
-  }, [darkMode]);
-
-  const fetchStudents = async () => {
+  const fetchStudents = useCallback(async () => {
     try {
       const res = await fetch(`${BASE_URL}/students`);
       const data = await res.json();
@@ -25,7 +17,15 @@ function App() {
     } catch (err) {
       console.error('Failed to fetch students:', err);
     }
-  };
+  }, [BASE_URL]);
+
+  useEffect(() => {
+    fetchStudents();
+  }, [fetchStudents]);
+
+  useEffect(() => {
+    document.body.className = darkMode ? 'dark' : 'light';
+  }, [darkMode]);
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));

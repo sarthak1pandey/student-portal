@@ -103,23 +103,27 @@ function App() {
             </tr>
           </thead>
           <tbody>
-            {students.map((student) => (
-              <tr key={student.ID}>
-                <td>{student.Name}</td>
-                <td>{student.Email}</td>
-                <td>{student.Course}</td>
-                <td>
-                  <button className="edit-btn" onClick={() => handleEdit(student)}>Edit</button>
-                  <button className="delete-btn" onClick={() => handleDelete(student.ID)}>Delete</button>
-                </td>
-              </tr>
-            ))}
-            {students.length === 0 && (
-              <tr>
-                <td colSpan="4">No students registered yet.</td>
-              </tr>
-            )}
-          </tbody>
+  {Array.isArray(students) ? (
+    students.length > 0 ? (
+      students.map((student) => (
+        <tr key={student.ID}>
+          <td>{student.Name}</td>
+          <td>{student.Email}</td>
+          <td>{student.Course}</td>
+          <td>
+            <button className="edit-btn" onClick={() => handleEdit(student)}>Edit</button>
+            <button className="delete-btn" onClick={() => handleDelete(student.ID)}>Delete</button>
+          </td>
+        </tr>
+      ))
+    ) : (
+      <tr><td colSpan="4">No students registered yet.</td></tr>
+    )
+  ) : (
+    <tr><td colSpan="4">Error loading students. Please check server.</td></tr>
+  )}
+</tbody>
+
         </table>
       </div>
     </div>

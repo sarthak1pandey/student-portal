@@ -5,7 +5,9 @@ function App() {
   const [formData, setFormData] = useState({ name: '', email: '', course: '' });
   const [students, setStudents] = useState([]);
   const [editingId, setEditingId] = useState(null);
-  const [darkMode, setDarkMode] = useState(true); // 🌗 Toggle state
+  const [darkMode, setDarkMode] = useState(true);
+
+  const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
   useEffect(() => {
     fetchStudents();
@@ -16,9 +18,13 @@ function App() {
   }, [darkMode]);
 
   const fetchStudents = async () => {
-    const res = await fetch('http://localhost:3000/students');
-    const data = await res.json();
-    setStudents(data);
+    try {
+      const res = await fetch(`${BASE_URL}/students`);
+      const data = await res.json();
+      setStudents(data);
+    } catch (err) {
+      console.error('Failed to fetch students:', err);
+    }
   };
 
   const handleChange = (e) => {
@@ -27,22 +33,26 @@ function App() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (editingId !== null) {
-      await fetch(`http://localhost:3000/students/${editingId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-      setEditingId(null);
-    } else {
-      await fetch('http://localhost:3000/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
+    try {
+      if (editingId !== null) {
+        await fetch(`${BASE_URL}/students/${editingId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        });
+        setEditingId(null);
+      } else {
+        await fetch(`${BASE_URL}/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        });
+      }
+      setFormData({ name: '', email: '', course: '' });
+      fetchStudents();
+    } catch (err) {
+      console.error('Submission failed:', err);
     }
-    setFormData({ name: '', email: '', course: '' });
-    fetchStudents();
   };
 
   const handleEdit = (student) => {
@@ -51,10 +61,14 @@ function App() {
   };
 
   const handleDelete = async (id) => {
-    await fetch(`http://localhost:3000/students/${id}`, {
-      method: 'DELETE',
-    });
-    fetchStudents();
+    try {
+      await fetch(`${BASE_URL}/students/${id}`, {
+        method: 'DELETE',
+      });
+      fetchStudents();
+    } catch (err) {
+      console.error('Deletion failed:', err);
+    }
   };
 
   return (
@@ -72,11 +86,7 @@ function App() {
         <input name="name" placeholder="Name" value={formData.name} onChange={handleChange} required />
         <input name="email" placeholder="Email" value={formData.email} onChange={handleChange} required />
         <input name="course" placeholder="Course" value={formData.course} onChange={handleChange} required />
-        <button
-          type="submit"
-          className="register-btn"
-          style={{ backgroundColor: '#9deaa5' }}
-        >
+        <button type="submit" className="register-btn" style={{ backgroundColor: '#9deaa5' }}>
           {editingId ? 'Update' : 'Register'}
         </button>
       </form>
